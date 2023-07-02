@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+  web_client:
+    container_name: web_client
+    hostname: web_client
+    build:
+      context: ./web_client
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./web_client:/app
+    networks:
+      - "web_proxy_network"
+    environment:
+      - NEXT_PUBLIC_API_BASE=/api/v1
+
+  web_server:
+    container_name: web_server
+    hostname: web_server
+    build:
+      context: "./web_server"
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./web_server:/app
+    networks:
+      - "web_proxy_network"
+
+  web_proxy:
+    image: nginx:1.22
+    container_name: web_proxy
+    hostname: web_proxy
+    restart: always
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+    networks:
+      - "web_proxy_network"
+
+networks:
+  web_proxy_network:
+    driver: bridge
