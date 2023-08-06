@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "scripts": {
-    "start:dev": "nodemon ./src/index.ts"
+    "start:dev": "nodemon ./src/index.ts",
+    "start:prod": "yarn run clean:prod && yarn run compile && NODE_ENV=production node ./dist/index.js",
+    "compile": "tsc",
+    "clean:prod": "rm -rf ./dist"
   },
   "license": "MIT",
   "dependencies": {
