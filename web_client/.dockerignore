@@ -1,5 +1,7 @@
 node_modules
 Dockerfile.dev
 .dockerignore
+.next
+out
 
 .env*
