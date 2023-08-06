@@ -39,6 +39,10 @@ Locally, we run 3 services, namely:
 - server-side server
 - reverse proxy (to connect the two)
 
+On the dev environment, the front-end calls api by directly requesting server-side docker container (routing handled by nginx reverse proxy).
+
+On prod env, to let front-end code request the api we need to pass server's URL via NEXT_PUBLIC_API_BASE env variable (in `.env.production`, learn more in `Building the production image` section below)
+
 ### How to run
 
 To run the app, you need to:
@@ -65,15 +69,17 @@ On production, the situation is different - we will not have any client-side ser
 
 To build production Docker image, you need to:
 
-1.  build client-side code:
+1. create `.env.production` file in `/web_client` dir with proper env variables inside. Please check the `/web_client/env.example` file for reference.
+
+2. build client-side code
 
 `$ cd ./web_client && yarn prod:build`
 
-2. compile the server-side code:
+3. compile the server-side code
 
 `$ cd ./web_server && yarn run compile`
 
-3. build the image
+4. build the image
 
 `$ docker build -t simple_app ./`
 
