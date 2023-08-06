@@ -1,0 +1,35 @@
+FROM node:18 as setup
+
+WORKDIR /app
+
+# setup web_client
+FROM setup as build_client
+
+WORKDIR /app/web_client
+
+COPY ./web_client/package.json .
+COPY ./web_client/yarn.lock .
+
+RUN yarn
+
+COPY ./web_client/ .
+
+RUN yarn prod:build
+
+# setup web_server
+FROM build_client as build_server
+
+WORKDIR /app/web_server
+
+COPY ./web_server/package.json .
+COPY ./web_server/yarn.lock .
+
+RUN yarn
+
+COPY ./web_server/ .
+
+EXPOSE 3000
+
+# TODO: intead of just running "node", run pm2 to benefit from clustering
+# example command: pm2 start yarn --interpreter bash --name simple-app-server -- start:prod
+CMD ["yarn", "start:prod"]

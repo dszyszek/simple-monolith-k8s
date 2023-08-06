@@ -1,5 +1,6 @@
 node_modules
 Dockerfile.dev
 .dockerignore
+dist
 
 .env*
