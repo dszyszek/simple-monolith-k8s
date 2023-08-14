@@ -91,6 +91,52 @@ After you successfuly built the image, you can run it with
 
 `$ docker run -it -p 3000:3000 simple_app`
 
-### Deploying with Kubernetes
+### Running with Kubernetes (locally, on minikube)
 
-TBA
+1. Run minikube
+
+`$ minikube start`
+
+2. Enable the metrics server
+
+`$ minikube addons enable metrics-server`
+
+Make sure the metrics server is running, with:
+
+`$ kubectl top pod`
+
+(it should print out the metrics for pods)
+
+If you see no output, run:
+
+`$ kubectl describe hpa`
+
+And check for the errors, especially `AbleToScale` and `ScalingActive` in `Conditions` section
+
+3. Deploy the application
+
+`$ kubectl apply -f ./deployment`
+
+That will run the deployment itself, along with its Load Balancer and Horizontal Autoscaler
+
+Great! Now your app is deployed. To see the application in the browser you need to do one more thing - tunnel the traffic from minikube to Load Balancer, to do so, run:
+
+`$ minikube tunnel`
+
+NOTE: run that command in separate terminal window, as it needs to be running when you want to see the app in web browser
+
+#### Dashboard
+
+If you want to see the dashboard, run:
+
+`$ minikube dashboard`
+
+which will automatically open up the browser tab with dashboard!
+
+#### Local testing the auto scaler
+
+If you want to test wether the horizontal autoscaler works, you can run
+
+`$ kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://simple-app-service; done"`
+
+while the app is running. Give it a couple of minutes and observe the results on the dashboard.
