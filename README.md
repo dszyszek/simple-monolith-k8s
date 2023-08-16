@@ -27,7 +27,8 @@ Simple app created for learning purposes
 #### Production
 
 - Docker
-- Kubernetes
+- Kubernetes (with hpa; local cluster -> minikube)
+- Nginx
 
 ## Local development
 
@@ -41,7 +42,10 @@ Locally, we run 3 services, namely:
 
 On the dev environment, the front-end calls api by directly requesting server-side docker container (routing handled by nginx reverse proxy).
 
-On prod env, to let front-end code request the api we need to pass server's URL via NEXT_PUBLIC_API_BASE env variable (in `.env.production`, learn more in `Building the production image` section below)
+On prod env, to let front-end code request the api we need to pass server's URL via NEXT_PUBLIC_API_BASE env variable (in `.env.production`, learn more in `Building the production image` section below).
+The traffic will be routed and handled by FE nginx server + K8S
+
+<h1>`diagrams for dev and prod envs to be added`</h1>
 
 ### How to run
 
@@ -63,35 +67,31 @@ And voilà, now just head to `http://localhost` and you should see the app runni
 
 ## Production
 
-On production, the situation is different - we will not have any client-side server. Instead, client code is build as static files, which then are served to the client. Beacuse of that we also don't need any reverse-proxy, from now on everything is handled by web server.
+On production, we have separate prod images for Front-end app and Back-end API -> FE will be served by nginx server, the BE will serve only as an API. Whole project will be deployed by K8S, but before we run any `kubectl` commands, we need to prepare Docker images first.
 
 ### Building the production image
 
-To build production Docker image, you need to:
+#### Building Front-end prod image
+
+To build FE production Docker image, you need to:
 
 1. create `.env.production` file in `/web_client` dir with proper env variables inside. Please check the `/web_client/env.example` file for reference.
 
-2. build client-side code
+2. build FE Docker container
 
-`$ cd ./web_client && yarn prod:build`
+`$ cd ./web_client && docker build -t simple-app-ui ./`
 
-3. compile the server-side code
+#### Building Back-end prod image
 
-`$ cd ./web_server && yarn run compile`
+To build BE production Docker image, you need to:
 
-4. build the image
+1. build BE image
 
-`$ docker build -t simple_app ./`
-
-<b>NOTE: build the image in the root directory of the project</b>
-
-### Running the production image
-
-After you successfuly built the image, you can run it with
-
-`$ docker run -it -p 3000:3000 simple_app`
+`$ cd ./web_server && docker build -t simple-app-server ./`
 
 ### Running with Kubernetes (locally, on minikube)
+
+Now we're able to deploy the app to K8S! We'll deploy the app to local K8S cluster and for that we'll use `minikube`. To deploy the app you need to:
 
 1. Run minikube
 
@@ -137,6 +137,6 @@ which will automatically open up the browser tab with dashboard!
 
 If you want to test wether the horizontal autoscaler works, you can run
 
-`$ kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://simple-app-service; done"`
+`$ kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://simple-app-server-service; done"`
 
 while the app is running. Give it a couple of minutes and observe the results on the dashboard.

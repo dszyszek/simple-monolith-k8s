@@ -1,0 +1,25 @@
+FROM node:18 as setup
+
+WORKDIR /app
+
+# build web client
+FROM setup as build_client
+
+WORKDIR /app/web_client
+
+COPY ./package.json .
+COPY ./yarn.lock .
+
+RUN yarn
+
+COPY ./ .
+
+RUN yarn prod:build
+
+
+FROM nginx:1.22-alpine as ui_server
+
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+# /usr/share/nginx/html is default nginx html dir
+COPY --from=build_client /app/web_client/out /usr/share/nginx/html
+EXPOSE 80

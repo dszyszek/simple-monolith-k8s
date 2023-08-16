@@ -2,31 +2,17 @@ FROM node:18 as setup
 
 WORKDIR /app
 
-# setup web_client
-FROM setup as build_client
-
-WORKDIR /app/web_client
-
-COPY ./web_client/package.json .
-COPY ./web_client/yarn.lock .
-
-RUN yarn
-
-COPY ./web_client/ .
-
-RUN yarn prod:build
-
-# setup web_server
-FROM build_client as build_server
+# setup api-server
+FROM setup as build_web_server
 
 WORKDIR /app/web_server
 
-COPY ./web_server/package.json .
-COPY ./web_server/yarn.lock .
+COPY ./package.json .
+COPY ./yarn.lock .
 
 RUN yarn
 
-COPY ./web_server/ .
+COPY ./ .
 
 EXPOSE 3000
 
