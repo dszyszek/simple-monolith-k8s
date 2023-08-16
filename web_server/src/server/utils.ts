@@ -22,8 +22,3 @@ export const setHeaders = (req: any, res: any, next: any) => {
   });
   next();
 };
-
-export const isProduction = () => {
-  const currentEnv = process.env.NODE_ENV;
-  return currentEnv === "production";
-};
