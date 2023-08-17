@@ -1,12 +1,12 @@
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: simple-app-hpa
+  name: simple-app-ui-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: simple-app-server
+    name: simple-app-ui
   minReplicas: 1
   maxReplicas: 10
   targetCPUUtilizationPercentage: 3
