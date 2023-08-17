@@ -42,8 +42,7 @@ Locally, we run 3 services, namely:
 
 On the dev environment, the front-end calls api by directly requesting server-side docker container (routing handled by nginx reverse proxy).
 
-On prod env, to let front-end code request the api we need to pass server's URL via NEXT_PUBLIC_API_BASE env variable (in `.env.production`, learn more in `Building the production image` section below).
-The traffic will be routed and handled by FE nginx server + K8S
+On prod env, we have separate pods for FE and BE (so they can be scaled separately). All traffic going to `/` hits FE pod (with nginx listening) and will return to user static FE code, all traffic to `/api/*` also hits FE nginx, but is proxied to BE pod (k8s Load balancer waits here and distributes the load to containers running api server)
 
 <h1>`diagrams for dev and prod envs to be added`</h1>
 
@@ -69,17 +68,25 @@ And voilà, now just head to `http://localhost` and you should see the app runni
 
 On production, we have separate prod images for Front-end app and Back-end API -> FE will be served by nginx server, the BE will serve only as an API. Whole project will be deployed by K8S, but before we run any `kubectl` commands, we need to prepare Docker images first.
 
+### Before you start
+
+Before you build any image, you need to start the `minikube` and then output environment variables needed to point the local Docker daemon to the minikube internal Docker registry:
+
+1. `$ minikube start`
+
+2. `$ eval $(minikube -p minikube docker-env)`
+
+We need to do it as we're using `imagePullPolicy: Never`, which means we'll use local container images. So first we need to set proper env variables and the build the images to add them to minikube's image registry.
+
 ### Building the production image
 
 #### Building Front-end prod image
 
 To build FE production Docker image, you need to:
 
-1. create `.env.production` file in `/web_client` dir with proper env variables inside. Please check the `/web_client/env.example` file for reference.
+1. build FE Docker container
 
-2. build FE Docker container
-
-`$ cd ./web_client && docker build -t simple-app-ui ./`
+`$ docker build -t simple-app-ui -f ./web_client/Dockerfile.prod ./web_client`
 
 #### Building Back-end prod image
 
@@ -87,13 +94,13 @@ To build BE production Docker image, you need to:
 
 1. build BE image
 
-`$ cd ./web_server && docker build -t simple-app-server ./`
+`$ docker build -t simple-app-server ./web_server/Dockerfile.prod ./web_server`
 
 ### Running with Kubernetes (locally, on minikube)
 
 Now we're able to deploy the app to K8S! We'll deploy the app to local K8S cluster and for that we'll use `minikube`. To deploy the app you need to:
 
-1. Run minikube
+0. We started minikube in previous steps, but just in case -> make sure you started the `minikube` cluster
 
 `$ minikube start`
 
@@ -107,11 +114,9 @@ Make sure the metrics server is running, with:
 
 (it should print out the metrics for pods)
 
-If you see no output, run:
-
-`$ kubectl describe hpa`
-
-And check for the errors, especially `AbleToScale` and `ScalingActive` in `Conditions` section
+```
+    NOTE: If you see no output, please check "Troubleshooting" section for solution
+```
 
 3. Deploy the application
 
@@ -137,6 +142,29 @@ which will automatically open up the browser tab with dashboard!
 
 If you want to test wether the horizontal autoscaler works, you can run
 
-`$ kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://simple-app-server-service; done"`
+`$ kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://simple-app-ui-service; done"`
 
-while the app is running. Give it a couple of minutes and observe the results on the dashboard.
+while the app is running. After some time (usually couple of minutes) of generating the load, in minikube's dashboard you should see how K8S adjusts number of running instances, depending on load target. You can also see the current targets and number of replicas by running:
+
+`$ kubectl get hpa`
+
+in the terminal.
+
+## Troubleshooting
+
+### No output after running `$ kubectl describe hpa`
+
+1. Run `$ kubectl describe hpa`
+
+And check for the errors, especially `AbleToScale` and `ScalingActive` in `Conditions` section
+Most probably you'll see some errors there. For more info, you can run minikube dashboard:
+
+`$ minikube dashboard`
+
+and check for exact error, if you see the `ErrImageNeverPull` (problems with pulling docker image from registry), move to the `ErrImageNeverPull error after running deployment with kubectl` section of Troubleshooting
+
+### ErrImageNeverPull error after running deployment with kubectl
+
+1. Make sure you start minikube first (`$ minikube start`) and <b>after</b> that `$ eval $(minikube -p minikube docker-env)`
+
+2. Afterwards you need to rebuild both FE and BE images one more time, for that see the `Building Front-end prod image` section
