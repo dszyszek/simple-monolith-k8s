@@ -10,8 +10,6 @@ services:
       - ./web_client:/app
     networks:
       - "web_proxy_network"
-    environment:
-      - NEXT_PUBLIC_API_BASE=/api/v1
 
   web_server:
     container_name: web_server
