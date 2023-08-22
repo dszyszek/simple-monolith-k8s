@@ -5,7 +5,7 @@ import { UserListElement } from "../types";
 export const getUserElementsList = async (): Promise<UserListElement[]> => {
   const response = await fetch(USER_LIST_URL);
   const responseJson = await response.json();
-  const userListElements = responseJson.userListElements as UserListElement[];
+  const userListElements = responseJson as UserListElement[];
 
   return userListElements;
 };

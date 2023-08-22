@@ -35,6 +35,8 @@ function ListSection() {
     setUserListElements(freshUserElementsList);
   };
 
+  console.log(userListElements, "userListElements");
+
   return (
     <>
       <div className="ListSection__add-element-box">
