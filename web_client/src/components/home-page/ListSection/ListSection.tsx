@@ -31,11 +31,10 @@ function ListSection() {
   const onAddElementButtonClick = async () => {
     const newUserElement = { value: inputState } as UserListElement;
     await postUserElement(newUserElement);
+
     const freshUserElementsList = await getUserElementsList();
     setUserListElements(freshUserElementsList);
   };
-
-  console.log(userListElements, "userListElements");
 
   return (
     <>

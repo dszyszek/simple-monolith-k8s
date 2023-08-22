@@ -1,9 +1,12 @@
-import { USER_LIST_URL } from "@client/consts";
+import {
+  GET_ALL_USER_ELEMENTS_URL,
+  POST_ADD_USER_ELEMENT_URL,
+} from "@client/consts";
 
 import { UserListElement } from "../types";
 
 export const getUserElementsList = async (): Promise<UserListElement[]> => {
-  const response = await fetch(USER_LIST_URL);
+  const response = await fetch(GET_ALL_USER_ELEMENTS_URL);
   const responseJson = await response.json();
   const userListElements = responseJson as UserListElement[];
 
@@ -13,7 +16,7 @@ export const getUserElementsList = async (): Promise<UserListElement[]> => {
 export const postUserElement = async (
   element: UserListElement
 ): Promise<Response> => {
-  const response = await fetch(USER_LIST_URL, {
+  const response = await fetch(POST_ADD_USER_ELEMENT_URL, {
     method: "POST",
     mode: "cors",
     cache: "no-cache",
