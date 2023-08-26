@@ -15,6 +15,8 @@ Simple app created for learning purposes
 - Node.js
 - Express
 - Typescript
+- Postgres
+- TypeORM
 
 ### Devops
 
