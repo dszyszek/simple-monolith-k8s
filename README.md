@@ -96,7 +96,7 @@ To build BE production Docker image, you need to:
 
 1. build BE image
 
-`$ docker build -t simple-app-server ./web_server/Dockerfile.prod ./web_server`
+`$ docker build -t simple-app-server -f ./web_server/Dockerfile.prod ./web_server`
 
 ### Running with Kubernetes (locally, on minikube)
 
