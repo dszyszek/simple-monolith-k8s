@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-secret-credentials
+  labels:
+    app: simple-app-db
+data:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
