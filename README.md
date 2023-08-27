@@ -1,6 +1,7 @@
 # Simple-app
 
-Simple app created for learning purposes
+Simple app created for learning purposes.
+Includes dev & prod environment setup, docker setup, local docker-compose + production Kubernetes deployment.
 
 ## Stack
 
