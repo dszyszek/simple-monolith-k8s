@@ -5,7 +5,7 @@ metadata:
   labels:
     app: simple-app-db
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 5432
   selector:
