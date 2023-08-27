@@ -2,6 +2,31 @@
 
 Simple app created for learning purposes.
 Includes dev & prod environment setup, docker setup, local docker-compose + production Kubernetes deployment.
+Additionally, Front-End service and Server service are horizontally autoscaled.
+
+## Architecture
+
+### Idea
+
+Locally, we run 4 services, namely:
+
+- client-side server (next js, to serve client-side code for development purposes)
+- server-side server
+- reverse proxy (to connect the two servers)
+- db
+
+On the dev environment, the front-end calls api by directly requesting server-side docker container (routing handled by nginx reverse proxy).
+
+On prod env, we have separate pods for FE and BE (so they can be scaled separately). Request from the user first hits the ingress controller (which routes the traffic). All traffic going to `/` hits FE 8s service. The FE deployment runs nginx server which listens to the requests and returns static FE code to the user.
+On the other hand requests going to `/api/*` are directed to BE service.
+
+### Cluster diagram
+
+![Alt text](./diagrams/simple-app-cluster.png "Cluster diagram")
+
+### Local development diagram
+
+![Alt text](./diagrams/simple-app-local-development.png "Local development diagram")
 
 ## Stack
 
@@ -32,30 +57,6 @@ Includes dev & prod environment setup, docker setup, local docker-compose + prod
 - Docker
 - Kubernetes (with hpa, ingress; local cluster -> minikube)
 - Nginx
-
-## Architecture
-
-### Idea
-
-Locally, we run 4 services, namely:
-
-- client-side server (next js, to serve client-side code for development purposes)
-- server-side server
-- reverse proxy (to connect the two servers)
-- db
-
-On the dev environment, the front-end calls api by directly requesting server-side docker container (routing handled by nginx reverse proxy).
-
-On prod env, we have separate pods for FE and BE (so they can be scaled separately). Request from the user first hits the ingress controller (which routes the traffic). All traffic going to `/` hits FE 8s service. The FE deployment runs nginx server which listens to the requests and returns static FE code to the user.
-On the other hand requests going to `/api/*` are directed to BE service.
-
-### Cluster diagram
-
-![Alt text](./diagrams/simple-app-cluster.png "Cluster diagram")
-
-### Local development diagram
-
-![Alt text](./diagrams/simple-app-local-development.png "Local development diagram")
 
 ## Local development
 
