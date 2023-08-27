@@ -29,24 +29,34 @@ Simple app created for learning purposes
 #### Production
 
 - Docker
-- Kubernetes (with hpa; local cluster -> minikube)
+- Kubernetes (with hpa, ingress; local cluster -> minikube)
 - Nginx
 
-## Local development
+## Architecture
 
 ### Idea
 
-Locally, we run 3 services, namely:
+Locally, we run 4 services, namely:
 
 - client-side server (next js, to serve client-side code for development purposes)
 - server-side server
-- reverse proxy (to connect the two)
+- reverse proxy (to connect the two servers)
+- db
 
 On the dev environment, the front-end calls api by directly requesting server-side docker container (routing handled by nginx reverse proxy).
 
-On prod env, we have separate pods for FE and BE (so they can be scaled separately). All traffic going to `/` hits FE pod (with nginx listening) and will return to user static FE code, all traffic to `/api/*` also hits FE nginx, but is proxied to BE pod (k8s Load balancer waits here and distributes the load to containers running api server)
+On prod env, we have separate pods for FE and BE (so they can be scaled separately). Request from the user first hits the ingress controller (which routes the traffic). All traffic going to `/` hits FE 8s service. The FE deployment runs nginx server which listens to the requests and returns static FE code to the user.
+On the other hand requests going to `/api/*` are directed to BE service.
 
-<h1>`diagrams for dev and prod envs to be added`</h1>
+### Cluster diagram
+
+![Alt text](./diagrams/simple-app-cluster.png "Cluster diagram")
+
+### Local development diagram
+
+![Alt text](./diagrams/simple-app-local-development.png "Local development diagram")
+
+## Local development
 
 ### How to run
 
