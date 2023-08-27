@@ -17,10 +17,17 @@ services:
     build:
       context: "./web_server"
       dockerfile: Dockerfile.dev
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: postgres
     volumes:
       - ./web_server:/app
     networks:
       - "web_proxy_network"
+      - "web_server_db_network"
 
   web_proxy:
     image: nginx:1.22
@@ -33,7 +40,27 @@ services:
       - "80:80"
     networks:
       - "web_proxy_network"
+  db:
+    image: postgres:14.1-alpine
+    container_name: db
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./web_server/db/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    networks:
+      - "web_server_db_network"
 
 networks:
   web_proxy_network:
     driver: bridge
+  web_server_db_network:
+    driver: bridge
+
+volumes:
+  db:
+    driver: local

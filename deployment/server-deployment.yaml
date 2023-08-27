@@ -18,6 +18,9 @@ spec:
           imagePullPolicy: Never
           ports:
             - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: server-secret-credentials
           resources:
             limits:
               cpu: 500m

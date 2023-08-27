@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: simple-app-ui-service
 spec:
+  type: ClusterIP
   selector:
     app: simple-app-ui
   ports:
     - protocol: "TCP"
       port: 80
       targetPort: 80
-  type: LoadBalancer

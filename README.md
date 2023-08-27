@@ -1,6 +1,7 @@
 # Simple-app
 
-Simple app created for learning purposes
+Simple app created for learning purposes.
+Includes dev & prod environment setup, docker setup, local docker-compose + production Kubernetes deployment.
 
 ## Stack
 
@@ -15,6 +16,8 @@ Simple app created for learning purposes
 - Node.js
 - Express
 - Typescript
+- Postgres
+- TypeORM
 
 ### Devops
 
@@ -27,24 +30,34 @@ Simple app created for learning purposes
 #### Production
 
 - Docker
-- Kubernetes (with hpa; local cluster -> minikube)
+- Kubernetes (with hpa, ingress; local cluster -> minikube)
 - Nginx
 
-## Local development
+## Architecture
 
 ### Idea
 
-Locally, we run 3 services, namely:
+Locally, we run 4 services, namely:
 
 - client-side server (next js, to serve client-side code for development purposes)
 - server-side server
-- reverse proxy (to connect the two)
+- reverse proxy (to connect the two servers)
+- db
 
 On the dev environment, the front-end calls api by directly requesting server-side docker container (routing handled by nginx reverse proxy).
 
-On prod env, we have separate pods for FE and BE (so they can be scaled separately). All traffic going to `/` hits FE pod (with nginx listening) and will return to user static FE code, all traffic to `/api/*` also hits FE nginx, but is proxied to BE pod (k8s Load balancer waits here and distributes the load to containers running api server)
+On prod env, we have separate pods for FE and BE (so they can be scaled separately). Request from the user first hits the ingress controller (which routes the traffic). All traffic going to `/` hits FE 8s service. The FE deployment runs nginx server which listens to the requests and returns static FE code to the user.
+On the other hand requests going to `/api/*` are directed to BE service.
 
-<h1>`diagrams for dev and prod envs to be added`</h1>
+### Cluster diagram
+
+![Alt text](./diagrams/simple-app-cluster.png "Cluster diagram")
+
+### Local development diagram
+
+![Alt text](./diagrams/simple-app-local-development.png "Local development diagram")
+
+## Local development
 
 ### How to run
 
@@ -94,7 +107,7 @@ To build BE production Docker image, you need to:
 
 1. build BE image
 
-`$ docker build -t simple-app-server ./web_server/Dockerfile.prod ./web_server`
+`$ docker build -t simple-app-server -f ./web_server/Dockerfile.prod ./web_server`
 
 ### Running with Kubernetes (locally, on minikube)
 
@@ -118,17 +131,31 @@ Make sure the metrics server is running, with:
     NOTE: If you see no output, please check "Troubleshooting" section for solution
 ```
 
-3. Deploy the application
+4. Enable ingress
 
-`$ kubectl apply -f ./deployment`
+`$ minikube addons enable ingress`
 
-That will run the deployment itself, along with its Load Balancer and Horizontal Autoscaler
+now wait a sec until it loads up. You can check if it's loaded with:
 
-Great! Now your app is deployed. To see the application in the browser you need to do one more thing - tunnel the traffic from minikube to Load Balancer, to do so, run:
+`kubectl get pods -n ingress-nginx`
+
+5. Enable ingress-dns
+
+`$ minikube addons enable ingress-dns`
+
+6. Create a tunnel between host and minikube (in a separate terminal window)
 
 `$ minikube tunnel`
 
-NOTE: run that command in separate terminal window, as it needs to be running when you want to see the app in web browser
+NOTE: once again - run that command in separate terminal window, as it needs to be running when you want to see the app in web browser. Do not kill the tunnel process until you want to close down the application.
+
+7. Deploy the application
+
+`$ kubectl apply -f ./deployment`
+
+That will deploy the whole application!
+
+Great! Now your app is deployed. To see the application in the browser, head to `localhost` in the browser
 
 #### Dashboard
 

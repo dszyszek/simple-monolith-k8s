@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: server-secret-credentials
+  labels:
+    app: simple-app-server
+data:
+  DB_HOST: simple-app-db-service
+  DB_PORT: "5432"
+  DB_USER: postgres
+  DB_PASSWORD: postgres
+  DB_NAME: postgres
