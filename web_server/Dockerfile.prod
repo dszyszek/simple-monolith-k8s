@@ -16,6 +16,4 @@ COPY ./ .
 
 EXPOSE 3000
 
-# TODO: intead of just running "node", run pm2 to benefit from clustering
-# example command: pm2 start yarn --interpreter bash --name simple-app-server -- start:prod
 CMD ["yarn", "start:prod"]
