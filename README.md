@@ -120,17 +120,31 @@ Make sure the metrics server is running, with:
     NOTE: If you see no output, please check "Troubleshooting" section for solution
 ```
 
-3. Deploy the application
+4. Enable ingress
 
-`$ kubectl apply -f ./deployment`
+`$ minikube addons enable ingress`
 
-That will run the deployment itself, along with its Load Balancer and Horizontal Autoscaler
+now wait a sec until it loads up. You can check if it's loaded with:
 
-Great! Now your app is deployed. To see the application in the browser you need to do one more thing - tunnel the traffic from minikube to Load Balancer, to do so, run:
+`kubectl get pods -n ingress-nginx`
+
+5. Enable ingress-dns
+
+`$ minikube addons enable ingress-dns`
+
+6. Create a tunnel between host and minikube (in a separate terminal window)
 
 `$ minikube tunnel`
 
-NOTE: run that command in separate terminal window, as it needs to be running when you want to see the app in web browser
+NOTE: once again - run that command in separate terminal window, as it needs to be running when you want to see the app in web browser. Do not kill the tunnel process until you want to close down the application.
+
+7. Deploy the application
+
+`$ kubectl apply -f ./deployment`
+
+That will deploy the whole application!
+
+Great! Now your app is deployed. To see the application in the browser, head to `localhost` in the browser
 
 #### Dashboard
 
